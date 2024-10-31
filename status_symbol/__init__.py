@@ -16,4 +16,4 @@ try:
 except ImportError:
     __version__ = "0.0.0"
 
-from version_check import pypi_version_check, emit_update_warning
+from .version_check import pypi_version_check, emit_update_warning
