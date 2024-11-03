@@ -18,6 +18,7 @@ from packaging.requirements import Requirement
 
 from .exceptions import StatusSymbolError
 
+
 def pypi_version_check(package: str) -> tuple:
     """Check if there is a newer version of a package avaiable via PyPi that is
     compatible with the current version of Python
@@ -37,15 +38,23 @@ def pypi_version_check(package: str) -> tuple:
     try:
         installed_version = __import__(package.replace("-", "_")).__version__
     except ModuleNotFoundError:
-        raise StatusSymbolError(f"Requested package {package} not installed.")
-        
+        raise StatusSymbolError(f"Requested package '{package}' not installed.")
+
     current_python = ".".join(str(num) for num in sys.version_info[:3])
+    package_found = True
     try:
         response = requests.get(f"https://pypi.org/pypi/{package}/json", timeout=3)
-        latest_version = response.json()["info"]["version"]
-        python_req = response.json()["info"].get("requires_python", "")
+        if not response.ok:
+            package_found = False
+        else:
+            latest_version = response.json()["info"]["version"]
+            python_req = response.json()["info"].get("requires_python", "")
     except requests.exceptions.ConnectionError:
         latest_version = installed_version
+    if not package_found:
+        raise StatusSymbolError(
+            f"Pypi check for '{package}' failed. Most likely package does not exist on pypi"
+        )
     update_available = False
     if (
         Version(latest_version) > Version(installed_version)
