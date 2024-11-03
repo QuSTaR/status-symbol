@@ -7,16 +7,17 @@
 # Any modifications or derivative works of this code must retain this
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
+"""status-symbol exceptions"""
 
-"""Status-symbol
-"""
 
-try:
-    from .version import version as __version__
-except ImportError:
-    __version__ = "0.0.0"
+class StatusSymbolError(Exception):
+    """Base class for errors raised by status-sybol"""
 
-from .version_check import pypi_version_check, emit_update_warning
-from .config import Configuration
+    def __init__(self, *message):
+        """Set the error message."""
+        super().__init__(" ".join(message))
+        self.message = " ".join(message)
 
-configuration = Configuration()
+    def __str__(self):
+        """Return the message."""
+        return repr(self.message)
