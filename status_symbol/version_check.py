@@ -73,5 +73,5 @@ def emit_update_warning(package: str, versions: tuple) -> None:
     """
     warnings.formatwarning = lambda msg, *args, **kwargs: f"{msg}\n"
     warnings.warn(
-        f"A newer version of {package} ({versions[0]}) is available. {versions[1]} currently installed."
+        f"A newer version of '{package}' ({versions[0]}) is available. {versions[1]} currently installed."
     )
