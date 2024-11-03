@@ -11,7 +11,7 @@
 
 
 class StatusSymbolError(Exception):
-    """Base class for errors raised by status-sybol"""
+    """Base class for errors raised by status-symbol"""
 
     def __init__(self, *message):
         """Set the error message."""
