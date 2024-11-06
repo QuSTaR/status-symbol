@@ -16,7 +16,27 @@ import configparser
 from .exceptions import StatusSymbolError
 
 
-FILENAME = os.path.join(os.path.expanduser("~"), ".status_symbol", "status_symbol.conf")
+if os.getenv('STATUSSYMBOL_CI', False):
+    _FILE = "status_symbol_testing.conf"
+else:
+    _FILE = "status_symbol.conf"
+
+FILENAME = os.path.join(os.path.expanduser("~"), ".status_symbol", _FILE)
+
+
+class StatusSymbolPackages(dict):
+    def __repr__(self):
+        # Find max key length
+        max_length = 0
+        for key in self:
+            max_length = max(max_length, len(key))
+
+        indent = 1
+        out = "Disabled packages\n"
+        out += "=" * 40 + "\n"
+        for key, val in self.items():
+            out += (" " * indent + key + " " * (max_length - len(key) + 5) + (f"{val}") + "\n")
+        return out
 
 
 class Configuration:
@@ -47,7 +67,7 @@ class Configuration:
         self.parser.read(self.filename)
         if "disabled" in self.parser.sections():
             self.package_list = dict(self.parser.items("disabled"))
-        return self.package_list
+        return StatusSymbolPackages(self.package_list)
 
     def is_disabled(self, package_name: str):
         """Is version check disabled for a package?
@@ -59,7 +79,7 @@ class Configuration:
         val = self.package_list.get(package_name, "False")
         return True if val == "True" else False
 
-    def disable_status_check(self, package_name: str):
+    def disable_version_check(self, package_name: str):
         """Disable version check for a package
 
         Parameters:
@@ -73,7 +93,7 @@ class Configuration:
         if "disabled" in self.parser.sections():
             present = self.parser.get("disabled", package_name, fallback=None)
             if present == "True":
-                return False
+                return True
         if "disabled" not in self.parser.sections():
             self.parser.add_section("disabled")
 
@@ -89,7 +109,7 @@ class Configuration:
         self.read_configuration()
         return True
 
-    def enable_status_check(self, package_name: str):
+    def enable_version_check(self, package_name: str):
         """Enable version check for a package
 
         Parameters:
@@ -105,7 +125,7 @@ class Configuration:
             if present == "True":
                 self.parser.set("disabled", package_name, str(False))
             else:
-                return False
+                return True
         try:
             with open(FILENAME, "w") as cfgfile:
                 self.parser.write(cfgfile)

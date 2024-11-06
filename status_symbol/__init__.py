@@ -10,11 +10,11 @@
 
 """Status-symbol
 """
-
 try:
     from .version import version as __version__
 except ImportError:
     __version__ = "0.0.0"
+
 
 from .version_check import pypi_version_check, emit_update_warning
 from .config import Configuration
